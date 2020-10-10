@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:screen/screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 import 'model/wifi.dart';
@@ -72,6 +73,14 @@ class _QRViewExampleState extends State<QRViewExample> {
                 child: connecting
                     ? CircularProgressIndicator()
                     : Icon(Icons.wifi)),
+          )
+        else if (qrType == QRType.website)
+          ListTile(
+            title: Text(qrText),
+            trailing: Icon(MdiIcons.web),
+            onTap: () async {
+              await launch(qrText);
+            },
           )
         else
           Text(qrText),
@@ -164,6 +173,8 @@ class _QRViewExampleState extends State<QRViewExample> {
       setState(() {
         qrText = scanData;
         scanning = false;
+        RegExp urlRegExp = RegExp(
+            "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})");
         if (qrText.startsWith("WIFI:S:")) {
           qrType = QRType.wifi;
           RegExp ssidRegExp = RegExp(
@@ -182,6 +193,8 @@ class _QRViewExampleState extends State<QRViewExample> {
           else
             networkSecurity = NetworkSecurity.NONE;
           wifi = Wifi(ssid, password, networkSecurity, false);
+        } else if (urlRegExp.hasMatch(qrText)) {
+          qrType = QRType.website;
         } else
           qrType = QRType.text;
       });
