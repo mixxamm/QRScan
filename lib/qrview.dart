@@ -17,7 +17,7 @@ class QRViewExample extends StatefulWidget {
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
 
-enum QRType { text, website, wifi, tel }
+enum QRType { text, website, wifi, tel, sms }
 
 class _QRViewExampleState extends State<QRViewExample> {
   var qrText = '';
@@ -29,6 +29,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   QRType qrType = QRType.text;
   Wifi wifi;
   bool connecting = false;
+  String phoneNumber, message;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +81,16 @@ class _QRViewExampleState extends State<QRViewExample> {
             trailing: Icon(MdiIcons.web),
             onTap: () async {
               await launch(qrText);
+            },
+          )
+        else if (qrType == QRType.sms)
+          ListTile(
+            title: Text(message),
+            subtitle: Text(phoneNumber),
+            trailing: Icon(Icons.message),
+            onTap: () async {
+              await launch(
+                  "sms:$phoneNumber?body=$message"); // TODO: Dit werkt niet op iOS, canLaunch gebruiken om op te vangen.
             },
           )
         else
@@ -195,6 +206,13 @@ class _QRViewExampleState extends State<QRViewExample> {
           wifi = Wifi(ssid, password, networkSecurity, false);
         } else if (urlRegExp.hasMatch(qrText)) {
           qrType = QRType.website;
+        } else if (qrText.startsWith("SMSTO:") || qrText.startsWith("SMS:")) {
+          int firstDivider = qrText.indexOf(":");
+          int secondDivider = qrText.indexOf(":", firstDivider + 1);
+          phoneNumber = qrText.substring(firstDivider + 1, secondDivider);
+          message = qrText.substring(secondDivider + 1);
+
+          qrType = QRType.sms;
         } else
           qrType = QRType.text;
       });
