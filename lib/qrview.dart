@@ -93,6 +93,14 @@ class _QRViewExampleState extends State<QRViewExample> {
                   "sms:$phoneNumber?body=$message"); // TODO: Dit werkt niet op iOS, canLaunch gebruiken om op te vangen.
             },
           )
+        else if (qrType == QRType.tel)
+          ListTile(
+            title: Text(qrText.substring(4)),
+            trailing: Icon(Icons.call),
+            onTap: () async {
+              await launch(qrText);
+            },
+          )
         else
           Text(qrText),
         RaisedButton(
@@ -213,6 +221,8 @@ class _QRViewExampleState extends State<QRViewExample> {
           message = qrText.substring(secondDivider + 1);
 
           qrType = QRType.sms;
+        } else if (qrText.startsWith("tel:")) {
+          qrType = QRType.tel;
         } else
           qrType = QRType.text;
       });
