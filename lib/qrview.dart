@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:screen/screen.dart';
+import 'package:wifi_iot/wifi_iot.dart';
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({
@@ -12,6 +14,8 @@ class QRViewExample extends StatefulWidget {
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
 
+enum QRType { text, website, wifi, tel }
+
 class _QRViewExampleState extends State<QRViewExample> {
   var qrText = '';
   QRViewController controller;
@@ -19,6 +23,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   bool flash = false;
   bool front = false;
   bool scanning = true;
+  QRType qrType = QRType.text;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +53,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(qrText),
+        if (qrType == QRType.wifi) Icon(Icons.wifi),
         RaisedButton(
           child: Text("Scan again"),
           onPressed: () {
@@ -116,6 +122,11 @@ class _QRViewExampleState extends State<QRViewExample> {
     ]);
   }
 
+  storeAndConnect(String ssid, String password) async {
+    WiFiForIoTPlugin.connect(ssid,
+        password: password, joinOnce: false, security: NetworkSecurity.WPA);
+  }
+
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
@@ -123,6 +134,10 @@ class _QRViewExampleState extends State<QRViewExample> {
       setState(() {
         qrText = scanData;
         scanning = false;
+        if (qrText.startsWith("WIFI:S:"))
+          qrType = QRType.wifi;
+        else
+          qrType = QRType.text;
       });
     });
   }

@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  wifi_iot: ^0.1.1
   screen: ^0.0.5
   material_design_icons_flutter: 4.0.5655
   qr_code_scanner: ^0.0.13
