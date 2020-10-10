@@ -5,6 +5,8 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:screen/screen.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
+import 'model/wifi.dart';
+
 class QRViewExample extends StatefulWidget {
   const QRViewExample({
     Key key,
@@ -24,6 +26,8 @@ class _QRViewExampleState extends State<QRViewExample> {
   bool front = false;
   bool scanning = true;
   QRType qrType = QRType.text;
+  Wifi wifi;
+  bool connecting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +56,25 @@ class _QRViewExampleState extends State<QRViewExample> {
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(qrText),
-        if (qrType == QRType.wifi) Icon(Icons.wifi),
+        if (qrType == QRType.wifi)
+          ListTile(
+            onTap: connecting ? null : storeAndConnect,
+            title: Text(wifi.ssid),
+            subtitle: Text(wifi.password),
+            trailing: AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                transitionBuilder:
+                    (Widget child, Animation<double> animation) =>
+                        ScaleTransition(
+                          child: child,
+                          scale: animation,
+                        ),
+                child: connecting
+                    ? CircularProgressIndicator()
+                    : Icon(Icons.wifi)),
+          )
+        else
+          Text(qrText),
         RaisedButton(
           child: Text("Scan again"),
           onPressed: () {
@@ -122,9 +143,18 @@ class _QRViewExampleState extends State<QRViewExample> {
     ]);
   }
 
-  storeAndConnect(String ssid, String password) async {
-    WiFiForIoTPlugin.connect(ssid,
-        password: password, joinOnce: false, security: NetworkSecurity.WPA);
+  storeAndConnect() async {
+    setState(() {
+      connecting = true;
+    });
+    bool connected = await WiFiForIoTPlugin.connect(wifi.ssid,
+        password: wifi.password,
+        joinOnce: false,
+        security: wifi.networkSecurity);
+    print(connected);
+    setState(() {
+      connecting = false;
+    });
   }
 
   void _onQRViewCreated(QRViewController controller) {
@@ -134,9 +164,25 @@ class _QRViewExampleState extends State<QRViewExample> {
       setState(() {
         qrText = scanData;
         scanning = false;
-        if (qrText.startsWith("WIFI:S:"))
+        if (qrText.startsWith("WIFI:S:")) {
           qrType = QRType.wifi;
-        else
+          RegExp ssidRegExp = RegExp(
+              "(?<=S:)((?:[^\;\?\"\$\[\\\]\+])|(?:\\[\\;,:]))+(?<!\\;)(?=;)");
+          RegExp passwordRegExp =
+              RegExp("(?<=P:)((?:\\[\\;,:])|(?:[^;]))+(?<!\\;)(?=;)");
+          RegExp networkTypeRegExp = RegExp("(?<=T:)[a-zA-Z]+(?=;)");
+          String ssid = ssidRegExp.stringMatch(qrText);
+          String password = passwordRegExp.stringMatch(qrText);
+          String nws = networkTypeRegExp.stringMatch(qrText);
+          NetworkSecurity networkSecurity;
+          if (nws == "WPA")
+            networkSecurity = NetworkSecurity.WPA;
+          else if (nws == "WEP")
+            networkSecurity = NetworkSecurity.WEP;
+          else
+            networkSecurity = NetworkSecurity.NONE;
+          wifi = Wifi(ssid, password, networkSecurity, false);
+        } else
           qrType = QRType.text;
       });
     });
