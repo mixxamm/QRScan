@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:qrscan/history.dart';
 import 'package:qrscan/qrview.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
-void main() {
+void main() async {
   runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDirectory =
+      await path_provider.getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDirectory.path);
+  await Hive.openBox("scans");
 }
 
 class MyApp extends StatelessWidget {
@@ -49,10 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     QRViewExample(),
-    Text(
-      'Index 1: History',
-      style: optionStyle,
-    ),
+    Text("Index 1"),
     Text(
       'Index 2: Genereate QR',
       style: optionStyle,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:screen/screen.dart';
@@ -285,6 +286,8 @@ class _QRViewExampleState extends State<QRViewExample> {
       controller.pauseCamera();
       setState(() {
         qrText = scanData;
+        var scans = Hive.box("scans");
+        scans.put(DateTime.now().toIso8601String(), qrText);
         scanning = false;
         RegExp urlRegExp = RegExp(
             "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})");
