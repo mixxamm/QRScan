@@ -6,6 +6,7 @@ import 'package:screen/screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
+import 'model/mail.dart';
 import 'model/wifi.dart';
 
 class QRViewExample extends StatefulWidget {
@@ -17,7 +18,7 @@ class QRViewExample extends StatefulWidget {
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
 
-enum QRType { text, website, wifi, tel, sms }
+enum QRType { text, website, wifi, tel, sms, mail }
 
 class _QRViewExampleState extends State<QRViewExample> {
   var qrText = '';
@@ -30,6 +31,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   Wifi wifi;
   bool connecting = false;
   String phoneNumber, message;
+  Mail mail;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,16 @@ class _QRViewExampleState extends State<QRViewExample> {
             trailing: Icon(Icons.call),
             onTap: () async {
               await launch(qrText);
+            },
+          )
+        else if (qrType == QRType.mail)
+          ListTile(
+            title: Text(mail.sub),
+            subtitle: Text(mail.to),
+            trailing: Icon(Icons.mail),
+            onTap: () async {
+              await launch(
+                  "mailto:${mail.to}?subject=${mail.sub}&body=${mail.body}");
             },
           )
         else
@@ -223,8 +235,19 @@ class _QRViewExampleState extends State<QRViewExample> {
           qrType = QRType.sms;
         } else if (qrText.startsWith("tel:")) {
           qrType = QRType.tel;
+        } else if (qrText.startsWith("MATMSG:TO:")) {
+          int toEnd = qrText.indexOf(";"),
+              subStart = qrText.indexOf(":", toEnd + 1),
+              subStop = qrText.indexOf(";", subStart + 1),
+              bodyStart = qrText.indexOf(":", subStop);
+          mail = Mail();
+          mail.to = qrText.substring(10, toEnd);
+          mail.sub = qrText.substring(subStart + 1, subStop);
+          mail.body = qrText.substring(bodyStart + 1, qrText.length - 2);
+          qrType = QRType.mail;
         } else
           qrType = QRType.text;
+        print(qrText);
       });
     });
   }
