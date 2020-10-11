@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:screen/screen.dart';
+import 'package:simple_vcard_parser/simple_vcard_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
@@ -18,7 +19,7 @@ class QRViewExample extends StatefulWidget {
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
 
-enum QRType { text, website, wifi, tel, sms, mail }
+enum QRType { text, website, wifi, tel, sms, mail, vcard }
 
 class _QRViewExampleState extends State<QRViewExample> {
   var qrText = '';
@@ -32,6 +33,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   bool connecting = false;
   String phoneNumber, message;
   Mail mail;
+  VCard vc;
 
   @override
   Widget build(BuildContext context) {
@@ -89,34 +91,26 @@ class _QRViewExampleState extends State<QRViewExample> {
           ListTile(
             title: Text(message),
             subtitle: Text(phoneNumber),
-            trailing: Icon(Icons.message),
+            trailing: Icon(Icons.message, color: Colors.redAccent),
             onTap: () async {
               await launch(
                   "sms:$phoneNumber?body=$message"); // TODO: Dit werkt niet op iOS, canLaunch gebruiken om op te vangen.
             },
           )
         else if (qrType == QRType.tel)
-          ListTile(
-            title: Text(qrText.substring(4)),
-            trailing: Icon(Icons.call),
-            onTap: () async {
-              await launch(qrText);
-            },
-          )
+          callTile(qrText.substring(4), subtitle: "Phone")
         else if (qrType == QRType.mail)
-          ListTile(
-            title: Text(mail.sub),
-            subtitle: Text(mail.to),
-            trailing: Icon(Icons.mail),
-            onTap: () async {
-              await launch(
-                  "mailto:${mail.to}?subject=${mail.sub}&body=${mail.body}");
-            },
+          mailTile(mail)
+        else if (qrType == QRType.vcard)
+          Flexible(
+            child: ListView(
+              children: vcardDetails(),
+            ),
           )
         else
-          Text(qrText),
+          copyTile(qrText, subtitle: "Text"),
         RaisedButton(
-          child: Text("Scan again"),
+          child: Text("New scan"),
           onPressed: () {
             setState(() {
               scanning = true;
@@ -125,6 +119,94 @@ class _QRViewExampleState extends State<QRViewExample> {
         )
       ],
     ));
+  }
+
+  List<Widget> vcardDetails() {
+    List<Widget> result = List();
+
+    print(vc.name.length);
+    if (vc.name.length > 0)
+      result.add(copyTile(
+          "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}",
+          subtitle: "Name"));
+    if (vc.organisation != null)
+      result.add(copyTile(vc.organisation, subtitle: "Organisation"));
+    if (vc.typedTelephone.length > 0) {
+      for (dynamic phone in vc.typedTelephone)
+        result.add(callTile(phone[0],
+            subtitle: phone[1].length > 0 ? phone[1][0] : "Phone"));
+    }
+    if (vc.email != null) {
+      Mail email = Mail();
+      email.to = vc.email;
+      email.sub = "";
+      email.body = "";
+      result.add(mailTile(email));
+    }
+    return result;
+  }
+
+  ListTile mailTile(Mail email) {
+    return ListTile(
+      title: Text(email.to ?? ""),
+      subtitle: Text(email.sub != "" ? email.sub : "Email"),
+      trailing: Icon(
+        Icons.mail,
+        color: Colors.redAccent,
+      ),
+      onTap: () async {
+        await launch(
+            "mailto:${email.to}?subject=${email.sub}&body=${email.body}");
+      },
+    );
+  }
+
+  ListTile callTile(String phone, {String subtitle}) {
+    return ListTile(
+      title: Text(phone),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+              padding: EdgeInsets.all(0),
+              alignment: Alignment.centerRight,
+              enableFeedback: true,
+              icon: Icon(
+                Icons.call,
+                color: Colors.redAccent,
+              ),
+              onPressed: () async {
+                await launch("tel:$phone");
+              }),
+          IconButton(
+            padding: EdgeInsets.all(0),
+            alignment: Alignment.centerRight,
+            enableFeedback: true,
+            icon: Icon(Icons.message, color: Colors.redAccent),
+            onPressed: () async {
+              await launch("sms:$phone");
+            },
+          )
+        ],
+      ),
+      subtitle: Text(subtitle ?? ""),
+    );
+  }
+
+  ListTile copyTile(String text, {String subtitle}) {
+    return ListTile(
+      title: Text(text),
+      trailing: Icon(
+        Icons.content_copy,
+        color: Colors.redAccent,
+      ),
+      subtitle: Text(subtitle ?? ""),
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: text));
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text("Copied to clipboard!")));
+      },
+    );
   }
 
   Widget scanView() {
@@ -224,7 +306,7 @@ class _QRViewExampleState extends State<QRViewExample> {
           else
             networkSecurity = NetworkSecurity.NONE;
           wifi = Wifi(ssid, password, networkSecurity, false);
-        } else if (urlRegExp.hasMatch(qrText)) {
+        } else if (qrText.startsWith("http") && urlRegExp.hasMatch(qrText)) {
           qrType = QRType.website;
         } else if (qrText.startsWith("SMSTO:") || qrText.startsWith("SMS:")) {
           int firstDivider = qrText.indexOf(":");
@@ -245,6 +327,9 @@ class _QRViewExampleState extends State<QRViewExample> {
           mail.sub = qrText.substring(subStart + 1, subStop);
           mail.body = qrText.substring(bodyStart + 1, qrText.length - 2);
           qrType = QRType.mail;
+        } else if (qrText.startsWith("BEGIN:VCARD")) {
+          vc = VCard(qrText);
+          qrType = QRType.vcard;
         } else
           qrType = QRType.text;
         print(qrText);
