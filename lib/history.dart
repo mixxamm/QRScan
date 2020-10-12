@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -11,7 +12,7 @@ import 'model/scan.dart';
 import 'package:intl/intl.dart';
 
 import 'model/wifi.dart';
-import 'qrview.dart';
+import 'package:qrscan/qrview.dart';
 
 class History extends StatefulWidget {
   const History({
@@ -22,6 +23,7 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
+  bool connecting = false;
   List<Scan> scans = List();
   final DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
   @override
@@ -74,6 +76,20 @@ class _HistoryState extends State<History> {
       else
         networkSecurity = NetworkSecurity.NONE;
       wifi = Wifi(ssid, password, networkSecurity, false);
+      return ListTile(
+        onTap: connecting ? null : () => storeAndConnect(wifi),
+        title: Text(wifi.ssid),
+        subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
+        leading: Icon(Icons.access_time),
+        trailing: AnimatedSwitcher(
+            duration: Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) =>
+                ScaleTransition(
+                  child: child,
+                  scale: animation,
+                ),
+            child: connecting ? CircularProgressIndicator() : Icon(Icons.wifi)),
+      );
     } else if (qrText.startsWith("http") && urlRegExp.hasMatch(qrText)) {
       qrType = QRType.website;
       return ListTile(
@@ -126,11 +142,19 @@ class _HistoryState extends State<History> {
     } else if (qrText.startsWith("BEGIN:VCARD")) {
       qrType = QRType.vcard;
       vc = VCard(qrText);
-      return ListTile(
-        leading: Icon(Icons.access_time),
-        trailing: Icon(Icons.contact_phone),
-        title: Text("${vc.name[0]} ${vc.name[1]}"),
-        subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
+      return OpenContainer(
+        closedElevation: 0,
+        openColor: Theme.of(context).canvasColor,
+        closedColor: Theme.of(context).canvasColor,
+        closedBuilder: (BuildContext c, VoidCallback action) => ListTile(
+          leading: Icon(Icons.access_time),
+          trailing: Icon(Icons.contact_phone),
+          title: Text("${vc.name[0]} ${vc.name[1]}"),
+          subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
+        ),
+        openBuilder: (BuildContext c, VoidCallback action) => ListView(
+          children: vcardDetails(vc),
+        ),
       );
     } else
       qrType = QRType.text;
@@ -146,5 +170,43 @@ class _HistoryState extends State<History> {
       },
       subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
     );
+  }
+
+  List<Widget> vcardDetails(VCard vc) {
+    List<Widget> result = List();
+
+    if (vc.name.length > 0)
+      result.add(copyTile(
+          "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}", context,
+          subtitle: "Name"));
+    if (vc.organisation != "")
+      result.add(copyTile(vc.organisation, context, subtitle: "Organisation"));
+    if (vc.typedTelephone.length > 0) {
+      for (dynamic phone in vc.typedTelephone)
+        result.add(callTile(phone[0],
+            subtitle: phone[1].length > 0 ? phone[1][0] : "Phone"));
+    }
+    if (vc.email != "") {
+      Mail email = Mail();
+      email.to = vc.email;
+      email.sub = "";
+      email.body = "";
+      result.add(mailTile(email));
+    }
+    return result;
+  }
+
+  storeAndConnect(Wifi wifi) async {
+    setState(() {
+      connecting = true;
+    });
+    bool connected = await WiFiForIoTPlugin.connect(wifi.ssid,
+        password: wifi.password,
+        joinOnce: false,
+        security: wifi.networkSecurity);
+    print(connected);
+    setState(() {
+      connecting = false;
+    });
   }
 }

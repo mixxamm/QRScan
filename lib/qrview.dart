@@ -109,7 +109,7 @@ class _QRViewExampleState extends State<QRViewExample> {
             ),
           )
         else
-          copyTile(qrText, subtitle: "Text"),
+          copyTile(qrText, context, subtitle: "Text"),
         RaisedButton(
           child: Text("New scan"),
           onPressed: () {
@@ -125,13 +125,12 @@ class _QRViewExampleState extends State<QRViewExample> {
   List<Widget> vcardDetails() {
     List<Widget> result = List();
 
-    print(vc.name.length);
     if (vc.name.length > 0)
       result.add(copyTile(
-          "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}",
+          "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}", context,
           subtitle: "Name"));
     if (vc.organisation != "")
-      result.add(copyTile(vc.organisation, subtitle: "Organisation"));
+      result.add(copyTile(vc.organisation, context, subtitle: "Organisation"));
     if (vc.typedTelephone.length > 0) {
       for (dynamic phone in vc.typedTelephone)
         result.add(callTile(phone[0],
@@ -145,69 +144,6 @@ class _QRViewExampleState extends State<QRViewExample> {
       result.add(mailTile(email));
     }
     return result;
-  }
-
-  ListTile mailTile(Mail email) {
-    return ListTile(
-      title: Text(email.to ?? ""),
-      subtitle: Text(email.sub != "" ? email.sub : "Email"),
-      trailing: Icon(
-        Icons.mail,
-        color: Colors.redAccent,
-      ),
-      onTap: () async {
-        await launch(
-            "mailto:${email.to}?subject=${email.sub}&body=${email.body}");
-      },
-    );
-  }
-
-  ListTile callTile(String phone, {String subtitle}) {
-    return ListTile(
-      title: Text(phone),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-              padding: EdgeInsets.all(0),
-              alignment: Alignment.centerRight,
-              enableFeedback: true,
-              icon: Icon(
-                Icons.call,
-                color: Colors.redAccent,
-              ),
-              onPressed: () async {
-                await launch("tel:$phone");
-              }),
-          IconButton(
-            padding: EdgeInsets.all(0),
-            alignment: Alignment.centerRight,
-            enableFeedback: true,
-            icon: Icon(Icons.message, color: Colors.redAccent),
-            onPressed: () async {
-              await launch("sms:$phone");
-            },
-          )
-        ],
-      ),
-      subtitle: Text(subtitle ?? ""),
-    );
-  }
-
-  ListTile copyTile(String text, {String subtitle}) {
-    return ListTile(
-      title: Text(text),
-      trailing: Icon(
-        Icons.content_copy,
-        color: Colors.redAccent,
-      ),
-      subtitle: Text(subtitle ?? ""),
-      onTap: () {
-        Clipboard.setData(ClipboardData(text: text));
-        Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text("Copied to clipboard!")));
-      },
-    );
   }
 
   Widget scanView() {
@@ -351,4 +287,67 @@ class _QRViewExampleState extends State<QRViewExample> {
     controller.dispose();
     super.dispose();
   }
+}
+
+ListTile copyTile(String text, BuildContext context, {String subtitle}) {
+  return ListTile(
+    title: Text(text),
+    trailing: Icon(
+      Icons.content_copy,
+      color: Colors.redAccent,
+    ),
+    subtitle: Text(subtitle ?? ""),
+    onTap: () {
+      Clipboard.setData(ClipboardData(text: text));
+      Scaffold.of(context)
+          .showSnackBar(SnackBar(content: Text("Copied to clipboard!")));
+    },
+  );
+}
+
+ListTile callTile(String phone, {String subtitle}) {
+  return ListTile(
+    title: Text(phone),
+    trailing: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+            padding: EdgeInsets.all(0),
+            alignment: Alignment.centerRight,
+            enableFeedback: true,
+            icon: Icon(
+              Icons.call,
+              color: Colors.redAccent,
+            ),
+            onPressed: () async {
+              await launch("tel:$phone");
+            }),
+        IconButton(
+          padding: EdgeInsets.all(0),
+          alignment: Alignment.centerRight,
+          enableFeedback: true,
+          icon: Icon(Icons.message, color: Colors.redAccent),
+          onPressed: () async {
+            await launch("sms:$phone");
+          },
+        )
+      ],
+    ),
+    subtitle: Text(subtitle ?? ""),
+  );
+}
+
+ListTile mailTile(Mail email) {
+  return ListTile(
+    title: Text(email.to ?? ""),
+    subtitle: Text(email.sub != "" ? email.sub : "Email"),
+    trailing: Icon(
+      Icons.mail,
+      color: Colors.redAccent,
+    ),
+    onTap: () async {
+      await launch(
+          "mailto:${email.to}?subject=${email.sub}&body=${email.body}");
+    },
+  );
 }
