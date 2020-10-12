@@ -130,14 +130,14 @@ class _QRViewExampleState extends State<QRViewExample> {
       result.add(copyTile(
           "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}",
           subtitle: "Name"));
-    if (vc.organisation != null)
+    if (vc.organisation != "")
       result.add(copyTile(vc.organisation, subtitle: "Organisation"));
     if (vc.typedTelephone.length > 0) {
       for (dynamic phone in vc.typedTelephone)
         result.add(callTile(phone[0],
             subtitle: phone[1].length > 0 ? phone[1][0] : "Phone"));
     }
-    if (vc.email != null) {
+    if (vc.email != "") {
       Mail email = Mail();
       email.to = vc.email;
       email.sub = "";
@@ -335,7 +335,6 @@ class _QRViewExampleState extends State<QRViewExample> {
           qrType = QRType.vcard;
         } else
           qrType = QRType.text;
-        print(qrText);
       });
     });
   }

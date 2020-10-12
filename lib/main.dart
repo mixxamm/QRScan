@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     QRViewExample(),
-    Text("Index 1"),
+    History(),
     Text(
       'Index 2: Genereate QR',
       style: optionStyle,
