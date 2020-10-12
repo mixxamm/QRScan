@@ -1,12 +1,16 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qrscan/generateqr.dart';
 import 'package:qrscan/history.dart';
 import 'package:qrscan/qrview.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:intl/intl.dart';
+
+import 'generated/l10n.dart';
 
 void main() async {
   runApp(MyApp());
@@ -22,6 +26,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
       title: 'QR Scanner',
       theme: ThemeData(
         brightness: SchedulerBinding.instance.window.platformBrightness ??
@@ -98,18 +108,18 @@ class _MyHomePageState extends State<MyHomePage> {
         child: _widgetOptions[_selectedIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(MdiIcons.qrcodeScan),
-            title: Text('Scan'),
+            title: Text(S.of(context).scan),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
-            title: Text('History'),
+            title: Text(S.of(context).history),
           ),
           BottomNavigationBarItem(
             icon: Icon(MdiIcons.qrcodeEdit),
-            title: Text('Generate'),
+            title: Text(S.of(context).generate),
           ),
         ],
         currentIndex: _selectedIndex,

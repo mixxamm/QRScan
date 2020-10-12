@@ -1,0 +1,13 @@
+{
+  "history": "Geschiedenis",
+  "generate": "Genereer",
+  "scan": "Scan",
+  "itsEmptyInHere": "Het is hier leeg",
+  "aFullListOfScannedQrAndBarcodesWillShow": "Een volledige lijst van gescande barcodes zal hier verschijnen.",
+  "copiedToClipboard": "Gekopieerd naar het klembord!",
+  "name": "Naam",
+  "organisation": "Organisatie",
+  "phone": "Telefoon",
+  "newScan": "Nieuwe scan",
+  "qrCodeText": "QR code tekst"
+}

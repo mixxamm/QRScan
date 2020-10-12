@@ -1,5 +1,6 @@
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:qrscan/generated/l10n.dart';
 
 class GenerateQR extends StatefulWidget {
   const GenerateQR({
@@ -41,7 +42,7 @@ class _GenerateQRState extends State<GenerateQR> {
                   controller: _controller,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'QR code text',
+                    labelText: S.of(context).qrCodeText,
                   ),
                 ),
               ),

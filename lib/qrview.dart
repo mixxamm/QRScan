@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qrscan/generated/l10n.dart';
 import 'package:screen/screen.dart';
 import 'package:simple_vcard_parser/simple_vcard_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -112,7 +113,7 @@ class _QRViewExampleState extends State<QRViewExample> {
           copyTile(qrText, context, subtitle: "Text"),
         RaisedButton(
           child: Text(
-            "New scan",
+            S.of(context).newScan,
             style: TextStyle(color: Colors.white),
           ),
           color: Colors.red,
@@ -132,13 +133,14 @@ class _QRViewExampleState extends State<QRViewExample> {
     if (vc.name.length > 0)
       result.add(copyTile(
           "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}", context,
-          subtitle: "Name"));
+          subtitle: S.of(context).name));
     if (vc.organisation != "")
-      result.add(copyTile(vc.organisation, context, subtitle: "Organisation"));
+      result.add(copyTile(vc.organisation, context,
+          subtitle: S.of(context).organisation));
     if (vc.typedTelephone.length > 0) {
       for (dynamic phone in vc.typedTelephone)
         result.add(callTile(phone[0],
-            subtitle: phone[1].length > 0 ? phone[1][0] : "Phone"));
+            subtitle: phone[1].length > 0 ? phone[1][0] : S.of(context).phone));
     }
     if (vc.email != "") {
       Mail email = Mail();
@@ -303,8 +305,8 @@ ListTile copyTile(String text, BuildContext context, {String subtitle}) {
     subtitle: Text(subtitle ?? ""),
     onTap: () {
       Clipboard.setData(ClipboardData(text: text));
-      Scaffold.of(context)
-          .showSnackBar(SnackBar(content: Text("Copied to clipboard!")));
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).copiedToClipboard)));
     },
   );
 }

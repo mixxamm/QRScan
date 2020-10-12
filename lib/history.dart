@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:qrscan/generated/l10n.dart';
 import 'package:simple_vcard_parser/simple_vcard_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wifi_iot/wifi_iot.dart';
@@ -45,7 +46,7 @@ class _HistoryState extends State<History> {
         child: scans.length <= 0
             ? Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -54,14 +55,14 @@ class _HistoryState extends State<History> {
                         size: 96,
                       ),
                       Text(
-                        "It's empty in here",
+                        S.of(context).itsEmptyInHere,
                         style: TextStyle(fontSize: 24),
                       ),
                       SizedBox(
                         height: 10,
                       ),
                       Text(
-                        "A full list of scanned QR- and barcodes will show up here.",
+                        S.of(context).aFullListOfScannedQrAndBarcodesWillShow,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -191,7 +192,7 @@ class _HistoryState extends State<History> {
       onTap: () {
         Clipboard.setData(ClipboardData(text: qrText));
         Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("Copied to clipboard!"),
+          content: Text(S.of(context).copiedToClipboard),
         ));
       },
       subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
@@ -204,13 +205,14 @@ class _HistoryState extends State<History> {
     if (vc.name.length > 0)
       result.add(copyTile(
           "${vc.name[0]} ${vc.name.length > 1 ? vc.name[1] : ""}", context,
-          subtitle: "Name"));
+          subtitle: S.of(context).name));
     if (vc.organisation != "")
-      result.add(copyTile(vc.organisation, context, subtitle: "Organisation"));
+      result.add(copyTile(vc.organisation, context,
+          subtitle: S.of(context).organisation));
     if (vc.typedTelephone.length > 0) {
       for (dynamic phone in vc.typedTelephone)
         result.add(callTile(phone[0],
-            subtitle: phone[1].length > 0 ? phone[1][0] : "Phone"));
+            subtitle: phone[1].length > 0 ? phone[1][0] : S.of(context).phone));
     }
     if (vc.email != "") {
       Mail email = Mail();

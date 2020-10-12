@@ -1,0 +1,13 @@
+{
+  "history": "History",
+  "generate": "Generate",
+  "scan": "Scan",
+  "itsEmptyInHere": "It's empty in here",
+  "aFullListOfScannedQrAndBarcodesWillShow": "A full list of scanned QR- and barcodes will show up here.",
+  "copiedToClipboard": "Copied to clipboard!",
+  "name": "Name",
+  "organisation": "Organisation",
+  "phone": "Phone",
+  "newScan": "New scan",
+  "qrCodeText": "QR code text"
+}
