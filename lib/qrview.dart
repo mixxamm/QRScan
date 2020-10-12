@@ -111,7 +111,11 @@ class _QRViewExampleState extends State<QRViewExample> {
         else
           copyTile(qrText, context, subtitle: "Text"),
         RaisedButton(
-          child: Text("New scan"),
+          child: Text(
+            "New scan",
+            style: TextStyle(color: Colors.white),
+          ),
+          color: Colors.red,
           onPressed: () {
             setState(() {
               scanning = true;
@@ -156,7 +160,7 @@ class _QRViewExampleState extends State<QRViewExample> {
           borderRadius: 15,
           borderLength: 50,
           borderWidth: 3,
-          cutOutSize: MediaQuery.of(context).size.height * 0.5,
+          cutOutSize: MediaQuery.of(context).size.height * 0.45,
           overlayColor: flash && front ? Colors.white70 : Colors.black45,
         ),
       ),
