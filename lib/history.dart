@@ -42,11 +42,37 @@ class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: ListView.builder(
-      itemCount: scans.length,
-      itemBuilder: (_, index) =>
-          getQRType(scans[index].data, scans[index].timestamp),
-    ));
+        child: scans.length <= 0
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 96,
+                      ),
+                      Text(
+                        "It's empty in here",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "A full list of scanned QR- and barcodes will show up here.",
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : ListView.builder(
+                itemCount: scans.length,
+                itemBuilder: (_, index) =>
+                    getQRType(scans[index].data, scans[index].timestamp),
+              ));
   }
 
   dynamic getQRType(String qrText, String timestamp) {
