@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:simple_vcard_parser/simple_vcard_parser.dart';
@@ -25,8 +26,8 @@ class _HistoryState extends State<History> {
   final DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
   @override
   void initState() {
-    loadScans();
     super.initState();
+    loadScans();
   }
 
   void loadScans() {
@@ -137,6 +138,12 @@ class _HistoryState extends State<History> {
       leading: Icon(Icons.access_time),
       trailing: Icon(MdiIcons.text),
       title: Text(qrText),
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: qrText));
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text("Copied to clipboard!"),
+        ));
+      },
       subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
     );
   }
