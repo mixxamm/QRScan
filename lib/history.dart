@@ -189,8 +189,10 @@ class _HistoryState extends State<History> {
               )
             ],
           ),
-          body: ListView(
-            children: vcardDetails(vc),
+          body: Builder(
+            builder: (BuildContext c1) => ListView(
+              children: vcardDetails(vc, c1),
+            ),
           ),
         ),
       );
@@ -210,7 +212,7 @@ class _HistoryState extends State<History> {
     );
   }
 
-  List<Widget> vcardDetails(VCard vc) {
+  List<Widget> vcardDetails(VCard vc, BuildContext context) {
     List<Widget> result = List();
 
     if (vc.name.length > 0)
