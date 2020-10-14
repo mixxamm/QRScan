@@ -65,21 +65,29 @@ class _QRViewExampleState extends State<QRViewExample> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (qrType == QRType.wifi)
-          ListTile(
-            onTap: connecting ? null : storeAndConnect,
-            title: Text(wifi.ssid),
-            subtitle: Text(wifi.password),
-            trailing: AnimatedSwitcher(
-                duration: Duration(milliseconds: 300),
-                transitionBuilder:
-                    (Widget child, Animation<double> animation) =>
-                        ScaleTransition(
-                          child: child,
-                          scale: animation,
-                        ),
-                child: connecting
-                    ? CircularProgressIndicator()
-                    : Icon(Icons.wifi)),
+          Flexible(
+            child: ListView(children: [
+              ListTile(
+                onTap: connecting ? null : storeAndConnect,
+                title: Text(wifi.ssid),
+                subtitle: Text("Tap to connect"),
+                trailing: AnimatedSwitcher(
+                    duration: Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) =>
+                            ScaleTransition(
+                              child: child,
+                              scale: animation,
+                            ),
+                    child: connecting
+                        ? CircularProgressIndicator()
+                        : Icon(
+                            Icons.wifi,
+                          )),
+              ),
+              copyTile(wifi.ssid, context, subtitle: "SSID"),
+              copyTile(wifi.password, context, subtitle: "Password"),
+            ]),
           )
         else if (qrType == QRType.website)
           ListTile(
