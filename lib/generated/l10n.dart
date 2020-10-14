@@ -142,6 +142,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Business card details`
+  String get businessCardDetails {
+    return Intl.message(
+      'Business card details',
+      name: 'businessCardDetails',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

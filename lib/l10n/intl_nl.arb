@@ -9,5 +9,6 @@
   "organisation": "Organisatie",
   "phone": "Telefoon",
   "newScan": "Nieuwe scan",
-  "qrCodeText": "QR code tekst"
+  "qrCodeText": "QR code tekst",
+  "businessCardDetails": "Business card details"
 }

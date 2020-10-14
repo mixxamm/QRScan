@@ -22,6 +22,7 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "aFullListOfScannedQrAndBarcodesWillShow" : MessageLookupByLibrary.simpleMessage("Een volledige lijst van gescande barcodes zal hier verschijnen."),
+    "businessCardDetails" : MessageLookupByLibrary.simpleMessage("Business card details"),
     "copiedToClipboard" : MessageLookupByLibrary.simpleMessage("Gekopieerd naar het klembord!"),
     "generate" : MessageLookupByLibrary.simpleMessage("Genereer"),
     "history" : MessageLookupByLibrary.simpleMessage("Geschiedenis"),

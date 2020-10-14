@@ -179,8 +179,19 @@ class _HistoryState extends State<History> {
           title: Text("${vc.name[0]} ${vc.name[1]}"),
           subtitle: Text(dateFormat.format(DateTime.parse(timestamp))),
         ),
-        openBuilder: (BuildContext c, VoidCallback action) => ListView(
-          children: vcardDetails(vc),
+        openBuilder: (BuildContext c, VoidCallback action) => Scaffold(
+          appBar: AppBar(
+            title: Text(S.of(context).businessCardDetails),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Icon(Icons.contact_phone),
+              )
+            ],
+          ),
+          body: ListView(
+            children: vcardDetails(vc),
+          ),
         ),
       );
     } else
